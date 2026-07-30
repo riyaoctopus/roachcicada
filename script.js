@@ -126,6 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok && data.success) {
+                    // Send conversion event to Google Analytics
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'generate_lead', {
+                            'value': 1.0,
+                            'currency': 'INR',
+                            'lead_type': `${bhk} BHK`
+                        });
+                    }
+
                     btn.textContent = 'Enquiry Sent Successfully!';
                     btn.style.backgroundColor = '#28a745';
                     btn.style.borderColor = '#28a745';
