@@ -78,7 +78,9 @@ def _build_fields(*, name: str, email: str, whatsapp: str, message: str) -> dict
         "Phone": whatsapp,
         "Mobile": whatsapp,
         "Email": email,
-        "Tag": [{"name": "roachcicada:website-chatbot"}],
+        # Zoho v6 Tag.name has a 25-char max (probed live: INVALID_DATA on
+        # "roachcicada:website-chatbot", 27 chars) — keep this short.
+        "Tag": [{"name": "roachcicada:website"}],
     }
     if first_name:
         fields["First_Name"] = first_name

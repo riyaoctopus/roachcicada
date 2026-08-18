@@ -218,4 +218,7 @@ def chat(payload: ChatRequest):
     images = images[:4]
     videos = videos[:1]
 
-    return ChatResponse(reply=reply, images=[f"/{p}" for p in images], videos=[f"/{p}" for p in videos])
+    # Relative (no leading slash) so it resolves correctly whether this app is
+    # served at domain root (local dev) or behind a reverse-proxy path prefix
+    # like https://dev.axonbos.com/roachcicada-chat/ (production).
+    return ChatResponse(reply=reply, images=list(images), videos=list(videos))

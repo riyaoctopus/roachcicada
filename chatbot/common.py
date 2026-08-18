@@ -18,7 +18,7 @@ CHAT_MODEL = os.environ.get("OPENAI_CHAT_MODEL", "gpt-4o-mini")
 # directly and never holds Zoho credentials — same rule as the email worker.
 GATEWAY_URL = os.environ.get("GATEWAY_URL", "http://axon-gateway-v2-dev:9200")
 ZOHO_COMPANY_ID = int(os.environ.get("ZOHO_COMPANY_ID", "29"))
-ZOHO_LEAD_SOURCE = os.environ.get("ZOHO_LEAD_SOURCE", "Website")
+ZOHO_LEAD_SOURCE = os.environ.get("ZOHO_LEAD_SOURCE", "Octopus Website")
 ZOHO_SOURCE_SERVICE_HEADER = "axon-automation"
 
 MEDIA_EXT_PATTERN = re.compile(

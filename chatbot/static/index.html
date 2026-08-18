@@ -309,7 +309,7 @@ leadSubmit.addEventListener('click', async () => {
   leadSubmit.textContent = 'Connecting...';
 
   try {
-    const resp = await fetch('/api/lead', {
+    const resp = await fetch('api/lead', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({name, email, whatsapp, message, consent}),
@@ -405,7 +405,7 @@ async function sendMessage() {
   addTyping();
 
   try {
-    const resp = await fetch('/api/chat', {
+    const resp = await fetch('api/chat', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({session_id: sessionId, message: text}),
