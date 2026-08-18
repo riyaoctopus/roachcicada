@@ -1,2 +1,21 @@
-node_modules
+# Node.js
+node_modules/
 .env
+
+# Secrets — never commit
+.secrets/
+
+# Python virtual env & caches
+chatbot/.venv/
+**/__pycache__/
+*.pyc
+
+# Generated/runtime data — leads contain buyer PII, index is a rebuildable artifact
+chatbot/data/
+chatbot/index/
+
+# OS cruft
+.DS_Store
+
+# Unrelated media that was mixed into the source material by mistake — never publish
+assets/unrelated-do-not-use/
