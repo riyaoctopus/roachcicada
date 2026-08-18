@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Roach Cicada — Speak with our Sales Consultant</title>
+<style>
+  :root {
+    --green-950: #0f2e21;
+    --green-900: #163a2a;
+    --green-800: #1c4632;
+    --gold: #d9b878;
+    --gold-soft: #efe0bd;
+    --cream: #faf7f0;
+    --ink: #1c2420;
+    --muted: #7c8a80;
+    --bubble-user: #1c4632;
+    --bubble-bot: #ffffff;
+    --danger: #b3432b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--green-950), var(--green-900) 40%, var(--cream) 40%);
+    background-attachment: fixed;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    width: 100%;
+    max-width: 760px;
+    padding: 36px 24px 12px;
+    text-align: center;
+    color: var(--gold-soft);
+  }
+  header .brand {
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  header h1 {
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0;
+    color: #fff;
+  }
+  header p {
+    margin: 8px auto 0;
+    max-width: 460px;
+    font-size: 14px;
+    color: #d9e4dc;
+    line-height: 1.5;
+  }
+
+  /* ---- Lead gate ---- */
+  #lead-gate {
+    width: 100%;
+    max-width: 460px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px 26px 22px;
+    margin: 20px 16px 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  }
+  #lead-gate h2 {
+    font-size: 17px;
+    margin: 0 0 4px;
+    color: var(--green-900);
+  }
+  #lead-gate .sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--green-900);
+    margin-bottom: 5px;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #dcdfd9;
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fbfbf9;
+  }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: #fff;
+  }
+  .field textarea { resize: vertical; min-height: 64px; }
+  .consent {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 16px 0 18px;
+  }
+  .consent input { margin-top: 3px; }
+  #lead-submit {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 9px;
+    background: var(--green-900);
+    color: #fff;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  #lead-submit:hover { background: var(--green-800); }
+  #lead-submit:disabled { opacity: .6; cursor: default; }
+  #lead-error {
+    color: var(--danger);
+    font-size: 12.5px;
+    margin-top: 10px;
+    display: none;
+  }
+
+  /* ---- Chat ---- */
+  #chat-wrap {
+    display: none;
+    width: 100%;
+    max-width: 640px;
+    margin: 16px 16px 32px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    overflow: hidden;
+    flex-direction: column;
+    height: 74vh;
+  }
+  #chat-header {
+    background: var(--green-900);
+    color: #fff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #chat-header .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--gold);
+    color: var(--green-950);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+  #chat-header .who .name { font-size: 14px; font-weight: 600; }
+  #chat-header .who .status { font-size: 11px; color: #b9ceb f; opacity: .8; color:#cfe2d4;}
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f5f3ec;
+  }
+  .msg { max-width: 82%; display: flex; flex-direction: column; gap: 8px; }
+  .msg.user { align-self: flex-end; align-items: flex-end; }
+  .msg.bot { align-self: flex-start; align-items: flex-start; }
+  .bubble {
+    padding: 11px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .msg.user .bubble { background: var(--bubble-user); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.bot .bubble { background: var(--bubble-bot); color: var(--ink); border: 1px solid #e7e4d8; border-bottom-left-radius: 4px; }
+  .media-row { display: flex; gap: 8px; flex-wrap: wrap; max-width: 100%; }
+  .media-row img { width: 140px; height: 100px; object-fit: cover; border-radius: 10px; border: 1px solid #e2e2e2; cursor: pointer; }
+  .media-row video { width: 220px; border-radius: 10px; border: 1px solid #e2e2e2; }
+  .typing { font-size: 12.5px; color: var(--muted); padding-left: 4px; }
+  #composer {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid #eee;
+    background: #fff;
+  }
+  #composer input {
+    flex: 1;
+    padding: 11px 14px;
+    border-radius: 22px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+  }
+  #composer input:focus { outline: none; border-color: var(--gold); }
+  #composer button {
+    padding: 0 20px;
+    border: none;
+    border-radius: 22px;
+    background: var(--green-900);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #composer button:disabled { opacity: .5; cursor: default; }
+
+  #lightbox {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,20,15,0.85);
+    align-items: center; justify-content: center;
+    z-index: 50;
+    padding: 30px;
+  }
+  #lightbox img { max-width: 100%; max-height: 100%; border-radius: 10px; }
+
+  footer {
+    color: rgba(255,255,255,0.55);
+    font-size: 11px;
+    padding: 0 20px 30px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Roach Cicada · Junnasandra, Sarjapur Road</div>
+  <h1>Talk to our sales consultant</h1>
+  <p>Ask anything about floor plans, pricing, amenities, location, or the developer — and see real photos and videos as we talk.</p>
+</header>
+
+<div id="lead-gate">
+  <h2>Let's get you connected</h2>
+  <div class="sub">Share a few details so our sales consultant can personalize the conversation and follow up if useful.</div>
+  <div class="field">
+    <label for="f-name">Full name</label>
+    <input id="f-name" type="text" placeholder="e.g. Arjun Mehta" autocomplete="name" />
+  </div>
+  <div class="field">
+    <label for="f-email">Email address</label>
+    <input id="f-email" type="email" placeholder="you@example.com" autocomplete="email" />
+  </div>
+  <div class="field">
+    <label for="f-whatsapp">WhatsApp number (with country code)</label>
+    <input id="f-whatsapp" type="tel" placeholder="+91 98765 43210" autocomplete="tel" />
+  </div>
+  <div class="field">
+    <label for="f-message">What brings you here? <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+    <textarea id="f-message" placeholder="e.g. Looking at a 3.5 BHK for my parents, currently based in Dubai..."></textarea>
+  </div>
+  <label class="consent">
+    <input id="f-consent" type="checkbox" />
+    <span>I agree that Roach Cicada's marketing team may contact me on WhatsApp <strong>only</strong> to discuss this property's details and sales-related matters.</span>
+  </label>
+  <button id="lead-submit">Start the conversation</button>
+  <div id="lead-error"></div>
+</div>
+
+<div id="chat-wrap">
+  <div id="chat-header">
+    <div class="avatar">A</div>
+    <div class="who">
+      <div class="name">Ananya · Sales Consultant, Roach Cicada</div>
+      <div class="status">Usually replies in a moment</div>
+    </div>
+  </div>
+  <div id="messages"></div>
+  <div id="composer">
+    <input id="chat-input" type="text" placeholder="Ask about pricing, floor plans, amenities, location..." />
+    <button id="chat-send">Send</button>
+  </div>
+</div>
+
+<div id="lightbox"><img id="lightbox-img" src="" /></div>
+
+<footer>Roach Cicada is a RERA-registered project by Roach Lifescapes LLP (RERA No. PRM/KA/RERA/1251/446/PR/051225/008318). This is an informational demo — please verify all figures with the sales team before making a decision.</footer>
+
+<script>
+let sessionId = null;
+let buyerName = null;
+
+const leadGate = document.getElementById('lead-gate');
+const chatWrap = document.getElementById('chat-wrap');
+const leadError = document.getElementById('lead-error');
+const leadSubmit = document.getElementById('lead-submit');
+const messagesEl = document.getElementById('messages');
+const chatInput = document.getElementById('chat-input');
+const chatSend = document.getElementById('chat-send');
+
+leadSubmit.addEventListener('click', async () => {
+  const name = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const whatsapp = document.getElementById('f-whatsapp').value.trim();
+  const message = document.getElementById('f-message').value.trim();
+  const consent = document.getElementById('f-consent').checked;
+
+  leadError.style.display = 'none';
+  leadSubmit.disabled = true;
+  leadSubmit.textContent = 'Connecting...';
+
+  try {
+    const resp = await fetch('/api/lead', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name, email, whatsapp, message, consent}),
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      throw new Error(data.detail || 'Something went wrong. Please check your details.');
+    }
+    sessionId = data.session_id;
+    buyerName = data.name;
+    leadGate.style.display = 'none';
+    chatWrap.style.display = 'flex';
+    addBotMessage(
+      `Hi ${buyerName}, wonderful to connect! I'm Ananya, here to help you with everything about Roach Cicada — ` +
+      `pricing, floor plans, amenities, location, or anything else on your mind. What would you like to know first?`
+    );
+    chatInput.focus();
+  } catch (err) {
+    leadError.textContent = err.message;
+    leadError.style.display = 'block';
+  } finally {
+    leadSubmit.disabled = false;
+    leadSubmit.textContent = 'Start the conversation';
+  }
+});
+
+function addUserMessage(text) {
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="bubble"></div>`;
+  div.querySelector('.bubble').textContent = text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addBotMessage(text, images = [], videos = []) {
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+  div.appendChild(bubble);
+
+  if (images.length || videos.length) {
+    const row = document.createElement('div');
+    row.className = 'media-row';
+    images.forEach(src => {
+      const img = document.createElement('img');
+      img.src = src;
+      img.addEventListener('click', () => openLightbox(src));
+      row.appendChild(img);
+    });
+    videos.forEach(src => {
+      const vid = document.createElement('video');
+      vid.src = src;
+      vid.controls = true;
+      row.appendChild(vid);
+    });
+    div.appendChild(row);
+  }
+
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.id = 'typing-indicator';
+  div.innerHTML = `<div class="typing">Ananya is typing...</div>`;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').style.display = 'flex';
+}
+document.getElementById('lightbox').addEventListener('click', () => {
+  document.getElementById('lightbox').style.display = 'none';
+});
+
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text || !sessionId) return;
+  addUserMessage(text);
+  chatInput.value = '';
+  chatSend.disabled = true;
+  addTyping();
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({session_id: sessionId, message: text}),
+    });
+    const data = await resp.json();
+    removeTyping();
+    if (!resp.ok) {
+      addBotMessage(data.detail || "Sorry, something went wrong on my end — could you try again?");
+      return;
+    }
+    addBotMessage(data.reply, data.images || [], data.videos || []);
+  } catch (err) {
+    removeTyping();
+    addBotMessage("Sorry, I couldn't reach the server just now. Please try again in a moment.");
+  } finally {
+    chatSend.disabled = false;
+    chatInput.focus();
+  }
+}
+
+chatSend.addEventListener('click', sendMessage);
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+</script>
+
+</body>
+</html>
