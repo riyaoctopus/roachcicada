@@ -1,0 +1,292 @@
+<!--
+  Roach Cicada — floating sales-chat widget
+  Paste this ENTIRE block into Webflow's Project Settings → Custom Code →
+  Footer Code (site-wide, before </body>). It self-mounts on every page —
+  no other setup needed. See webflow-widget/README.md for full instructions.
+
+  To point at a different deployment later, change CHAT_URL below — nothing
+  else needs to change.
+-->
+<style>
+  #rc-fw-root, #rc-fw-root * { box-sizing: border-box; }
+
+  #rc-fw-root {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 2147483000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  /* Attention pill, shown briefly before first open */
+  #rc-fw-pill {
+    position: absolute;
+    right: 76px;
+    bottom: 14px;
+    max-width: 220px;
+    background: #ffffff;
+    color: #1c2420;
+    padding: 10px 14px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(15, 46, 33, 0.22);
+    font-size: 13.5px;
+    line-height: 1.35;
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #rc-fw-pill.rc-fw-show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    white-space: normal;
+  }
+  #rc-fw-pill button {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid #e4ddce;
+    background: #faf7f0;
+    color: #7c8a80;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* Floating action button */
+  #rc-fw-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #163a2a;
+    border: none;
+    box-shadow: 0 10px 28px rgba(15, 46, 33, 0.38);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 0;
+  }
+  #rc-fw-btn:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 14px 32px rgba(15, 46, 33, 0.45);
+  }
+  #rc-fw-btn svg { width: 26px; height: 26px; }
+  #rc-fw-btn .rc-fw-icon-close { display: none; }
+  #rc-fw-root.rc-fw-open #rc-fw-btn .rc-fw-icon-chat { display: none; }
+  #rc-fw-root.rc-fw-open #rc-fw-btn .rc-fw-icon-close { display: block; }
+
+  /* Panel */
+  #rc-fw-panel {
+    position: fixed;
+    right: 24px;
+    bottom: 100px;
+    width: 392px;
+    height: min(650px, calc(100vh - 140px));
+    max-height: 720px;
+    background: #faf7f0;
+    border-radius: 18px;
+    box-shadow: 0 24px 64px rgba(15, 46, 33, 0.32);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  #rc-fw-root.rc-fw-open #rc-fw-panel {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  #rc-fw-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #163a2a;
+    color: #faf7f0;
+  }
+  #rc-fw-header-title { font-size: 14.5px; font-weight: 600; letter-spacing: 0.2px; }
+  #rc-fw-header-sub { font-size: 11.5px; color: #d9b878; margin-top: 1px; }
+  #rc-fw-header-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.12);
+    color: #faf7f0;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  #rc-fw-header-close:hover { background: rgba(255,255,255,0.22); }
+
+  #rc-fw-iframe-wrap { flex: 1 1 auto; position: relative; background: #faf7f0; }
+  #rc-fw-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  #rc-fw-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7c8a80;
+    font-size: 13px;
+  }
+
+  /* Mobile: full-screen sheet */
+  @media (max-width: 640px) {
+    #rc-fw-root { right: 16px; bottom: 16px; }
+    #rc-fw-panel {
+      right: 0;
+      bottom: 0;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      max-height: none;
+      border-radius: 0;
+    }
+    #rc-fw-pill { display: none; }
+  }
+</style>
+
+<div id="rc-fw-root">
+  <div id="rc-fw-pill">
+    Questions about Roach Cicada? Chat with our sales consultant.
+    <button id="rc-fw-pill-close" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <div id="rc-fw-panel" role="dialog" aria-label="Roach Cicada sales chat">
+    <div id="rc-fw-header">
+      <div>
+        <div id="rc-fw-header-title">Roach Cicada</div>
+        <div id="rc-fw-header-sub">Sales Consultant</div>
+      </div>
+      <button id="rc-fw-header-close" aria-label="Close chat">&times;</button>
+    </div>
+    <div id="rc-fw-iframe-wrap">
+      <div id="rc-fw-loading">Loading…</div>
+      <iframe id="rc-fw-iframe" title="Roach Cicada sales chat" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <button id="rc-fw-btn" aria-label="Chat with Roach Cicada sales consultant">
+    <svg class="rc-fw-icon-chat" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v10c0 .83-.67 1.5-1.5 1.5H9l-4.5 4v-4H5.5C4.67 17 4 16.33 4 15.5v-10Z"
+        stroke="#faf7f0" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="8.5" cy="10.2" r="1" fill="#faf7f0"/>
+      <circle cx="12" cy="10.2" r="1" fill="#faf7f0"/>
+      <circle cx="15.5" cy="10.2" r="1" fill="#faf7f0"/>
+    </svg>
+    <svg class="rc-fw-icon-close" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 6L18 18M18 6L6 18" stroke="#faf7f0" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+</div>
+
+<script>
+(function () {
+  var CHAT_URL = "https://dev.axonbos.com/roachcicada-chat/";
+
+  var root = document.getElementById('rc-fw-root');
+  var btn = document.getElementById('rc-fw-btn');
+  var panel = document.getElementById('rc-fw-panel');
+  var closeBtn = document.getElementById('rc-fw-header-close');
+  var iframe = document.getElementById('rc-fw-iframe');
+  var loading = document.getElementById('rc-fw-loading');
+  var pill = document.getElementById('rc-fw-pill');
+  var pillClose = document.getElementById('rc-fw-pill-close');
+  var iframeLoaded = false;
+  var lockedScrollY = 0;
+
+  function isMobile() { return window.matchMedia('(max-width: 640px)').matches; }
+
+  function lockBodyScroll() {
+    lockedScrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + lockedScrollY + 'px';
+    document.body.style.width = '100%';
+  }
+  function unlockBodyScroll() {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, lockedScrollY);
+  }
+
+  function openPanel() {
+    if (!iframeLoaded) {
+      iframe.src = CHAT_URL;
+      iframe.addEventListener('load', function () { loading.style.display = 'none'; }, { once: true });
+      iframeLoaded = true;
+    }
+    root.classList.add('rc-fw-open');
+    hidePill();
+    if (isMobile()) lockBodyScroll();
+    panel.setAttribute('aria-hidden', 'false');
+  }
+
+  function closePanel() {
+    // Move focus out before hiding — setting aria-hidden on an ancestor of
+    // the still-focused close button is an a11y violation browsers warn on.
+    if (panel.contains(document.activeElement)) btn.focus();
+    root.classList.remove('rc-fw-open');
+    if (isMobile()) unlockBodyScroll();
+    panel.setAttribute('aria-hidden', 'true');
+  }
+
+  function hidePill() {
+    pill.classList.remove('rc-fw-show');
+  }
+
+  btn.addEventListener('click', function () {
+    if (root.classList.contains('rc-fw-open')) closePanel();
+    else openPanel();
+  });
+  closeBtn.addEventListener('click', closePanel);
+  pillClose.addEventListener('click', function (e) {
+    e.stopPropagation();
+    hidePill();
+  });
+  pill.addEventListener('click', openPanel);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && root.classList.contains('rc-fw-open')) closePanel();
+  });
+
+  // Show the attention pill once, a few seconds after the page settles,
+  // and auto-hide it after a while if ignored.
+  if (!isMobile() && !sessionStorage.getItem('rc-fw-pill-seen')) {
+    setTimeout(function () {
+      if (!root.classList.contains('rc-fw-open')) {
+        pill.classList.add('rc-fw-show');
+        sessionStorage.setItem('rc-fw-pill-seen', '1');
+        setTimeout(hidePill, 9000);
+      }
+    }, 2500);
+  }
+})();
+</script>

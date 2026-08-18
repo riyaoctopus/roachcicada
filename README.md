@@ -55,4 +55,8 @@ Image filenames are descriptive (e.g. `11-floorplan-3bhk-towerAC-3rd6th9th-sba21
 
 ## Chatbot demo
 
-`chatbot/` contains a local RAG-powered chat demo — a real-estate-sales-persona assistant (built for HNI/NRI buyers) that answers questions grounded in this knowledge base and surfaces relevant photos/videos inline. See [chatbot/README.md](chatbot/README.md) to run it.
+`chatbot/` contains the RAG-powered chat backend — a real-estate-sales-persona assistant (built for HNI/NRI buyers) that answers questions grounded in this knowledge base, surfaces relevant photos/videos inline, and pushes leads to Zoho CRM. See [chatbot/README.md](chatbot/README.md) to run it locally, and [chatbot/DEPLOYMENT.md](chatbot/DEPLOYMENT.md) for the production deployment — live at **https://dev.axonbos.com/roachcicada-chat/**.
+
+## Website widget
+
+`webflow-widget/` contains the floating chat-button snippet for embedding on roachcicada.co. See [webflow-widget/README.md](webflow-widget/README.md) — it's a single paste into Webflow's site-wide Custom Code, no other setup.
